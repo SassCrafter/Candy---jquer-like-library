@@ -8,7 +8,7 @@ function scripts() {
   return (
     src(['./src/utils.js','./src/candy.js', './src/$.js', './src/**/*.js'])
       .pipe(plumber())
-      .pipe(concat("query.js"))
+      .pipe(concat("candy.js"))
       .pipe(
         babel({
           presets: [

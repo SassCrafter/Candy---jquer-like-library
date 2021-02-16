@@ -102,6 +102,34 @@ Candy.prototype.addClass = function (classes) {
   return this;
 };
 
+Candy.prototype.append = function () {
+  var childEl;
+
+  for (var i = 0; i < arguments.length; i++) {
+    childEl = i < 0 || arguments.length <= i ? undefined : arguments[i]; //console.log(childEl);
+
+    for (var _j = 0; _j < this.length; _j++) {
+      if (typeof childEl === 'string') {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = childEl;
+
+        this[_j].appendChild(tempDiv.firstElementChild);
+      } else if (childEl instanceof Candy) {
+        console.log('childEl', childEl);
+
+        this[_j].appendChild(childEl[_j]);
+      } else {
+        this[_j].appendChild(childEl);
+      }
+    }
+  }
+};
+
+Candy.prototype.appendTo = function (parent) {
+  $(parent).append(this);
+  return this;
+};
+
 Candy.prototype.attr = function (attrs, value) {
   var _arguments = arguments;
 
@@ -116,6 +144,12 @@ Candy.prototype.attr = function (attrs, value) {
     }
   });
   return this;
+};
+
+Candy.prototype.css = function (propertyName, value) {
+  if (propertyName && !value) {
+    console.log(propertyName);
+  }
 };
 
 Candy.prototype.hasClass = function (classes) {
@@ -134,6 +168,30 @@ Candy.prototype.hasClass = function (classes) {
   console.log(contains);
 };
 
+Candy.prototype.prepend = function () {
+  var childEl;
+
+  for (var i = 0; i < arguments.length; i++) {
+    childEl = i < 0 || arguments.length <= i ? undefined : arguments[i];
+
+    for (j = 0; j < this.length; j++) {
+      if (typeof childEl === 'string') {
+        var tempDiv = document.createElement('div');
+        tempDiv.innerHTML = childEl;
+        this[j].insertBefore(tempDiv.firstElementChild, this[j].childNodes[0]);
+      } else if (childEl instanceof Candy) {
+        this[j].insertBefore(childEl[j], this[j].childNodes[0]);
+      } else {
+        this[j].insertBefore(childEl[j], this[j].childNodes[0]);
+      }
+    }
+  }
+};
+
+Candy.prototype.prependTo = function (parent) {
+  $(parent).prepend(this);
+};
+
 Candy.prototype.removeAttr = function (attr) {
   this.forEach(function (el) {
     el.removeAttribute(attr);
@@ -148,6 +206,16 @@ Candy.prototype.removeClass = function (classes) {
 
     return (_el$classList3 = el.classList).remove.apply(_el$classList3, _toConsumableArray(classNames));
   });
+  return this;
+};
+
+Candy.prototype.text = function (text) {
+  if (this[0]) {
+    this.forEach(function (el) {
+      return el.textContent = text.trim();
+    });
+  }
+
   return this;
 };
 
