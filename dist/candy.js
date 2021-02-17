@@ -242,17 +242,19 @@ Candy.prototype.before = function (content) {
 };
 
 Candy.prototype.children = function (selector) {
-  var childs = [];
+  var children = [];
 
-  if (typeof selector === 'string') {
-    this.forEach(function (node) {
-      console.log(node.childNodes);
-      var i = 0;
-      var childNodes = node.childNodes;
-    });
+  for (var i = 0; i < this.length; i++) {
+    var childNodes = this[i].children;
+
+    for (var _j3 = 0; _j3 < childNodes.length; _j3++) {
+      if (!selector || $(childNodes[_j3]).is(selector)) {
+        children.push(childNodes[_j3]);
+      }
+    }
   }
 
-  return this;
+  return $(children);
 };
 
 Candy.prototype.clone = function () {
@@ -395,6 +397,37 @@ Candy.prototype.is = function (selector) {
   return false;
 };
 
+Candy.prototype.next = function (selector) {
+  if (this.length > 0) {
+    if (this[0].nextElementSibling) {
+      if (!selector || $(this[0].nextElementSibling).is(selector)) {
+        return $([this[0].nextElementSibling]);
+      }
+    }
+  }
+
+  return $([]);
+};
+
+Candy.prototype.nextAll = function (selector) {
+  if (this.length > 0) {
+    var nextSiblings = [];
+    var el = this[0];
+
+    while (el.nextElementSibling) {
+      if (!selector || $(el.nextElementSibling).is(selector)) {
+        nextSiblings.push(el.nextElementSibling);
+      }
+
+      el = el.nextElementSibling;
+    }
+
+    return $(nextSiblings);
+  }
+
+  return $([]);
+};
+
 Candy.prototype.odd = function () {
   var nodes = _toConsumableArray(this);
 
@@ -402,6 +435,37 @@ Candy.prototype.odd = function () {
     if (idx % 2 !== 0) return el;
   });
   return $(evenArr);
+};
+
+Candy.prototype.parent = function (selector) {
+  var parents = [];
+  this.forEach(function (el) {
+    if (el.parentNode) {
+      if ((!selector || $(el.parentNode).is(selector)) && !parents.includes(el.parentNode)) {
+        parents.push(el.parentNode);
+      }
+    }
+  });
+  return $(parents);
+};
+
+Candy.prototype.parents = function (selector) {
+  var parents = [];
+  this.forEach(function (el) {
+    var parentEl = el.parentNode;
+
+    while (parentEl) {
+      console.log(parentEl);
+      if (parentEl === document.body) break;
+
+      if ((!selector || $(parentEl).is(selector)) && !parents.includes(parentEl)) {
+        parents.push(parentEl);
+      }
+
+      parentEl = parentEl.parentNode;
+    }
+  });
+  return $(parents);
 };
 
 Candy.prototype.prepend = function () {
@@ -426,6 +490,37 @@ Candy.prototype.prepend = function () {
 
 Candy.prototype.prependTo = function (parent) {
   $(parent).prepend(this);
+};
+
+Candy.prototype.prev = function (selector) {
+  if (this.length > 0) {
+    if (this[0].previousElementSibling) {
+      if (!selector || $(this[0].previousElementSibling).is(selector)) {
+        return $(this[0].previousElementSibling);
+      }
+    }
+  }
+
+  return $([]);
+};
+
+Candy.prototype.prevAll = function (selector) {
+  if (this.length > 0) {
+    var prevSiblings = [];
+    var el = this[0];
+
+    while (el.previousElementSibling) {
+      if (!selector || $(el.previousElementSibling).is(selector)) {
+        prevSiblings.push(el.previousElementSibling);
+      }
+
+      el = el.previousElementSibling;
+    }
+
+    return $(prevSiblings);
+  }
+
+  return $([]);
 };
 
 Candy.prototype.prop = function (props, value) {
@@ -472,6 +567,26 @@ Candy.prototype.removeClass = function (classes) {
     return (_el$classList3 = el.classList).remove.apply(_el$classList3, _toConsumableArray(classNames));
   });
   return this;
+};
+
+Candy.prototype.siblings = function (selector) {
+  var siblings = [];
+
+  if (this.length > 0) {
+    if (!this[0].parentNode) return siblings;
+    var sibling = this[0].parentNode.firstChild;
+    console.log(sibling);
+
+    while (sibling) {
+      if (sibling.nodeType === 1 && (!selector || $(sibling).is(selector)) && sibling !== this[0]) {
+        siblings.push(sibling);
+      }
+
+      sibling = sibling.nextSibling;
+    }
+  }
+
+  return $(siblings);
 };
 
 Candy.prototype.text = function (text) {

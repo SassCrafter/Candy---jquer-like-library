@@ -1,11 +1,15 @@
 Candy.prototype.children = function(selector) {
-	let childs = [];
-	if (typeof selector === 'string') {
-		this.forEach(node => {
-			console.log(node.childNodes);
-			let i = 0;
-			const childNodes = node.childNodes;
-		});
+	let children = [];
+
+	for (let i = 0; i < this.length; i++) {
+		const childNodes = this[i].children;
+
+		for (let j = 0; j < childNodes.length; j++) {
+			if (!selector || $(childNodes[j]).is(selector)) {
+				children.push(childNodes[j]);
+			}
+		}
 	}
-	return this;
+
+	return $(children);
 }
