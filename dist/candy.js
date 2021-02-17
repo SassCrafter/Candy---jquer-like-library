@@ -72,7 +72,7 @@ function qsa(selector, context) {
   }
 
   var a = [];
-  var items = document.querySelectorAll(selector);
+  var items = context.querySelectorAll(selector);
   items.forEach(function (item) {
     a.push(item);
   });
@@ -241,6 +241,20 @@ Candy.prototype.before = function (content) {
   return this;
 };
 
+Candy.prototype.children = function (selector) {
+  var childs = [];
+
+  if (typeof selector === 'string') {
+    this.forEach(function (node) {
+      console.log(node.childNodes);
+      var i = 0;
+      var childNodes = node.childNodes;
+    });
+  }
+
+  return this;
+};
+
 Candy.prototype.clone = function () {
   return new Candy([this[0].cloneNode(true)]);
 };
@@ -352,6 +366,33 @@ Candy.prototype.height = function (value) {
   this.forEach(function (el) {
     $(el).css('height', val);
   });
+};
+
+Candy.prototype.is = function (selector) {
+  var el = this[0]; //console.log(el.parentElement);
+
+  var compareWith;
+  if (!el || typeof selector === 'undefined') return false;
+
+  if (typeof selector === 'string') {
+    compareWith = $(selector, el.parentElement); //console.log(compareWith);
+
+    for (var i = 0; i < compareWith.length; i++) {
+      if (el === compareWith[i]) {
+        return true;
+      }
+    }
+  } else if (selector.nodeType || selector instanceof Candy) {
+    compareWith = selector.nodeType ? [selector] : selector;
+
+    for (var _i = 0; _i < compareWith.length; _i++) {
+      if (el === compareWith[_i]) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 };
 
 Candy.prototype.odd = function () {

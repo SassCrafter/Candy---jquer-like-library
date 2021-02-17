@@ -4,7 +4,7 @@ function qsa(selector, context) {
     }
 
     const a = [];
-    const items = document.querySelectorAll(selector);
+    const items = context.querySelectorAll(selector);
     items.forEach(item => {
         a.push(item);
     })
