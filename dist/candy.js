@@ -125,6 +125,43 @@ Candy.prototype.addClass = function (classes) {
   return this;
 };
 
+Candy.prototype.after = function (content) {
+  var _this = this;
+
+  // If content instance of Candy
+  if (content instanceof Candy) {
+    // Clone content elements if more than one target element
+    if (this.length > 1) {
+      this.forEach(function (el, idx) {
+        content.forEach(function (elToAppend) {
+          el.parentElement.insertBefore($(elToAppend).clone()[0], _this[idx + 1]);
+        });
+      });
+    } else {
+      // Append content els to single target
+      content.forEach(function (elToAppend) {
+        _this[0].parentElement.insertBefore(elToAppend, _this[0].nextElementSibling);
+      });
+    } // Same logic for html string
+
+  } else if (typeof content === 'string') {
+    var tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+
+    if (this.length > 1) {
+      this.forEach(function (el, idx) {
+        el.parentElement.insertBefore($(tempDiv.firstChild).clone()[0], _this[idx + 1]);
+      });
+    } else {
+      this.forEach(function (el) {
+        _this[0].parentElement.insertBefore(tempDiv.firstChild, _this[0].nextElementSibling);
+      });
+    }
+  }
+
+  return this;
+};
+
 Candy.prototype.append = function () {
   var childEl;
 
@@ -164,6 +201,43 @@ Candy.prototype.attr = function (attrs, value) {
       el.setAttribute(attrs, value);
     }
   });
+  return this;
+};
+
+Candy.prototype.before = function (content) {
+  var _this2 = this;
+
+  // If content instance of Candy
+  if (content instanceof Candy) {
+    // Clone content elements if more than one target element
+    if (this.length > 1) {
+      this.forEach(function (el, idx) {
+        content.forEach(function (elToAppend) {
+          el.parentElement.insertBefore($(elToAppend).clone()[0], _this2[idx]);
+        });
+      });
+    } else {
+      // Append content els to single target
+      content.forEach(function (elToAppend) {
+        _this2[0].parentElement.insertBefore(elToAppend, _this2[0]);
+      });
+    } // Same logic for html string
+
+  } else if (typeof content === 'string') {
+    var tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+
+    if (this.length > 1) {
+      this.forEach(function (el, idx) {
+        el.parentElement.insertBefore($(tempDiv.firstChild).clone()[0], _this2[idx]);
+      });
+    } else {
+      this.forEach(function (el) {
+        _this2[0].parentElement.insertBefore(tempDiv.firstChild, _this2[0]);
+      });
+    }
+  }
+
   return this;
 };
 
