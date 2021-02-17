@@ -11,7 +11,6 @@ Candy.prototype.append = function(...els) {
 				tempDiv.innerHTML = childEl;
 				this[j].appendChild(tempDiv.firstElementChild);
 			} else if (childEl instanceof Candy) {
-				console.log('childEl',childEl);
 				this[j].appendChild(childEl[j]);
 			} else {
 				this[j].appendChild(childEl);

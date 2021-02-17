@@ -1,6 +1,10 @@
 Candy.prototype.text = function(text) {
-	if (this[0]) {
-		this.forEach(el => el.textContent = text.trim());
+	if (text) {
+		if (this[0]) {
+			this.forEach(el => el.textContent = text.trim());
+		}
+	} else {
+		return this[0].textContent;
 	}
 	return this;
 }

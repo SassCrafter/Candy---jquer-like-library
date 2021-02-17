@@ -46,6 +46,12 @@ function flattenArray(arr) {
   return res;
 }
 
+function toCamelCase(string) {
+  return string.toLowerCase().replace(/-(.)/g, function (match, group) {
+    return group.toUpperCase();
+  });
+}
+
 var Candy = /*#__PURE__*/function (_Array) {
   _inherits(Candy, _Array);
 
@@ -86,11 +92,28 @@ function $(selector, context) {
 
   if (typeof selector === 'string') {
     arr = qsa(selector.trim(), context || document);
-    console.log(arr);
+  } else if (selector.nodeType || selector === document || selector === window) {
+    arr.push(selector);
+  } else if (Array.isArray(selector)) {
+    return new Candy(selector);
   }
 
   return new Candy(arr);
 }
+
+Candy.prototype.add = function () {
+  var dom = this;
+
+  for (var i = 0; i < arguments.length; i++) {
+    var toAdd = $(i < 0 || arguments.length <= i ? undefined : arguments[i]);
+
+    for (var _j = 0; _j < toAdd.length; _j++) {
+      dom.append(toAdd[_j]);
+    }
+  }
+
+  return dom;
+};
 
 Candy.prototype.addClass = function (classes) {
   var classNames = flattenArray(classes.split(' '));
@@ -108,18 +131,16 @@ Candy.prototype.append = function () {
   for (var i = 0; i < arguments.length; i++) {
     childEl = i < 0 || arguments.length <= i ? undefined : arguments[i]; //console.log(childEl);
 
-    for (var _j = 0; _j < this.length; _j++) {
+    for (var _j2 = 0; _j2 < this.length; _j2++) {
       if (typeof childEl === 'string') {
         var tempDiv = document.createElement('div');
         tempDiv.innerHTML = childEl;
 
-        this[_j].appendChild(tempDiv.firstElementChild);
+        this[_j2].appendChild(tempDiv.firstElementChild);
       } else if (childEl instanceof Candy) {
-        console.log('childEl', childEl);
-
-        this[_j].appendChild(childEl[_j]);
+        this[_j2].appendChild(childEl[_j2]);
       } else {
-        this[_j].appendChild(childEl);
+        this[_j2].appendChild(childEl);
       }
     }
   }
@@ -146,10 +167,85 @@ Candy.prototype.attr = function (attrs, value) {
   return this;
 };
 
+Candy.prototype.clone = function () {
+  return new Candy([this[0].cloneNode(true)]);
+};
+
 Candy.prototype.css = function (propertyName, value) {
   if (propertyName && !value) {
-    console.log(propertyName);
+    // $('p').css('color')
+    if (typeof propertyName === 'string') {
+      if (this[0]) {
+        return getComputedStyle(this[0])[toCamelCase(propertyName)];
+      }
+    } else {
+      // $('p').css({color: 'red'})
+      this.forEach(function (el) {
+        for (var prop in propertyName) {
+          //console.log(toCamelCase())
+          el.style[toCamelCase(prop)] = propertyName[prop];
+        }
+      });
+      return this;
+    }
   }
+
+  if (propertyName && value) {
+    // $('p').css('width', '20px');
+    this.forEach(function (el) {
+      el.style[toCamelCase(propertyName)] = value;
+    });
+    return this;
+  }
+
+  return this;
+};
+
+Candy.prototype.data = function (key, value) {
+  if (key && !value) {
+    if (typeof key === 'string') {
+      if (this[0]) return this[0].dataset[toCamelCase(key)];
+    } else {
+      // Object -> set value
+      this.forEach(function (el) {
+        for (var name in key) {
+          el.dataset[toCamelCase(name)] = key[name];
+        }
+      });
+    }
+  } else if (typeof key === 'string' && typeof value === 'string') {
+    this.forEach(function (el) {
+      el.dataset[toCamelCase(key)] = value;
+    });
+  }
+};
+
+Candy.prototype.each = function (callback) {
+  this.forEach(function (el, idx) {
+    callback.call(el, idx);
+  });
+};
+
+Candy.prototype.empty = function () {
+  this.forEach(function (el) {
+    // If element node
+    if (el.nodeType === 1) {
+      // Remove all node childs (Element, text)
+      while (el.firstChild) {
+        el.removeChild(el.firstChild);
+      }
+    }
+  });
+  return this;
+};
+
+Candy.prototype.even = function () {
+  var nodes = _toConsumableArray(this);
+
+  var evenArr = nodes.filter(function (el, idx) {
+    if (idx % 2 === 0) return el;
+  });
+  return $(evenArr);
 };
 
 Candy.prototype.hasClass = function (classes) {
@@ -166,6 +262,31 @@ Candy.prototype.hasClass = function (classes) {
   // }).length > 0;
 
   console.log(contains);
+};
+
+Candy.prototype.height = function (value) {
+  if (typeof value === 'undefined') {
+    if (this[0]) {
+      return this[0].offsetHeight;
+    }
+
+    return undefined;
+  }
+
+  var val = typeof value === 'number' ? "".concat(value, "px") : value;
+  console.log(val);
+  this.forEach(function (el) {
+    $(el).css('height', val);
+  });
+};
+
+Candy.prototype.odd = function () {
+  var nodes = _toConsumableArray(this);
+
+  var evenArr = nodes.filter(function (el, idx) {
+    if (idx % 2 !== 0) return el;
+  });
+  return $(evenArr);
 };
 
 Candy.prototype.prepend = function () {
@@ -192,6 +313,35 @@ Candy.prototype.prependTo = function (parent) {
   $(parent).prepend(this);
 };
 
+Candy.prototype.prop = function (props, value) {
+  var _arguments2 = arguments;
+
+  if (arguments.length === 1 && typeof props === 'string') {
+    if (this[0]) return this[0][props];
+  } else {
+    // Set props
+    this.forEach(function (el) {
+      if (_arguments2.length === 2) {
+        // Two strings
+        el[props] = value;
+      } else if (_arguments2.length === 1) {
+        // Object
+        for (var propName in props) {
+          el[propName] = props[propName];
+        }
+      }
+    });
+  }
+
+  return this;
+};
+
+Candy.prototype.remove = function () {
+  this.forEach(function (el) {
+    return el.remove();
+  });
+};
+
 Candy.prototype.removeAttr = function (attr) {
   this.forEach(function (el) {
     el.removeAttribute(attr);
@@ -210,13 +360,21 @@ Candy.prototype.removeClass = function (classes) {
 };
 
 Candy.prototype.text = function (text) {
-  if (this[0]) {
-    this.forEach(function (el) {
-      return el.textContent = text.trim();
-    });
+  if (text) {
+    if (this[0]) {
+      this.forEach(function (el) {
+        return el.textContent = text.trim();
+      });
+    }
+  } else {
+    return this[0].textContent;
   }
 
   return this;
+};
+
+Candy.prototype.toArray = function () {
+  return _toConsumableArray(this);
 };
 
 Candy.prototype.toggleClass = function (classes) {
@@ -228,4 +386,48 @@ Candy.prototype.toggleClass = function (classes) {
     });
   });
   return this;
+};
+
+Candy.prototype.val = function (val) {
+  if (typeof val === 'undefined') {
+    var el = this[0];
+    console.log(el.multiple);
+    if (!el) return undefined;
+
+    if (el.multiple && el.nodeName.toLowerCase() === 'select') {
+      console.log(el.selectedOptions);
+      var values = [];
+
+      for (var i = 0; i < el.selectedOptions.length; i++) {
+        values.push(el.selectedOptions[i].value);
+      }
+
+      return values;
+    }
+
+    return el.value;
+  }
+
+  this[0].value = val;
+  return this;
+};
+
+Candy.prototype.value = function () {
+  return this.value;
+};
+
+Candy.prototype.width = function (value) {
+  if (typeof value === 'undefined') {
+    if (this[0]) {
+      return this[0].offsetWidth;
+    }
+
+    return undefined;
+  }
+
+  var val = typeof value === 'number' ? "".concat(value, "px") : value;
+  console.log(val);
+  this.forEach(function (el) {
+    $(el).css('width', val);
+  });
 };

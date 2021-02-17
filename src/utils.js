@@ -9,3 +9,9 @@ function flattenArray(arr) {
 	});
 	return res;
 }
+
+function toCamelCase(string) {
+	return string
+    .toLowerCase()
+    .replace(/-(.)/g, (match, group) => group.toUpperCase());
+}

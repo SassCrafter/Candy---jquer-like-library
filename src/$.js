@@ -14,14 +14,20 @@ function qsa(selector, context) {
 function $(selector, context) {
     let arr = [];
     if (!context && selector instanceof Candy ) {
-        return [selector]
+        return [selector];
     }
     if (!selector) {
         return new Candy(arr);
     }
     if (typeof selector === 'string') {
         arr = qsa(selector.trim(), context || document);
-        console.log(arr);
+    } else if (
+        selector.nodeType ||
+        selector === document ||
+        selector === window) {
+            arr.push(selector);
+    } else if (Array.isArray(selector)) {
+        return new Candy(selector);
     }
     return new Candy(arr);
 }
