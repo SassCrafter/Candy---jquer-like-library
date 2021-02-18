@@ -437,6 +437,110 @@ Candy.prototype.odd = function () {
   return $(evenArr);
 };
 
+Candy.prototype.off = function () {
+  var _this3 = this;
+
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
+
+  var eventType = args[0],
+      targetSelector = args[1],
+      callback = args[2];
+
+  if (typeof targetSelector === 'function') {
+    targetSelector = null;
+    eventType = args[0];
+    callback = args[1];
+  }
+
+  var events = eventType.split(' ');
+  events.forEach(function (event) {
+    _this3.forEach(function (el) {
+      if (!targetSelector || $(el).is(targetSelector)) {
+        var eventsToRemove = el.candyEvents.filter(function (eventObj) {
+          return eventObj.type === event;
+        });
+        console.log(eventsToRemove);
+      }
+    });
+  });
+};
+
+Candy.prototype.on = function () {
+  for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+    args[_key2] = arguments[_key2];
+  }
+
+  var eventType = args[0],
+      targetSelector = args[1],
+      callback = args[2],
+      data = args.slice(3); // If function is first parameter or no parameters return
+
+  if (!eventType || typeof eventType === 'function') return this; // If second parameter is a function then no targetSelector;
+
+  if (typeof targetSelector === 'function') {
+    eventType = args[0];
+    callback = args[1];
+    data = args.slice(2);
+    targetSelector = undefined;
+  } // Named function for eventlistener so we can than remove it with off();
+  // function callbackHandler(e) {
+  //     callback.call(null, e, data);
+  // }
+  // this.forEach(el => {
+  //     if (!targetSelector || $(el).is(targetSelector)) {
+  //         events.forEach(eventName => {
+  //             el.addEventListener(eventName, callbackHandler);
+  //         });
+  //         console.log(this);
+  //     }
+  // });
+
+
+  function handleEvent(e) {
+    var targetData = e && e.target ? e.target.candyEvents.event[0].data : []; // If targetData already has e object than replace it with the new one, if not add one
+
+    var hasEvent = targetData.find(function (el) {
+      return el.target;
+    });
+
+    if (hasEvent) {
+      targetData.shift();
+      targetData.unshift(e);
+    } else {
+      targetData.unshift(e);
+    }
+
+    callback.apply(this, targetData);
+  }
+
+  var events = eventType.split(' ');
+  this.forEach(function (el) {
+    if (!targetSelector || $(el).is(targetSelector)) {
+      events.forEach(function (eventName) {
+        // set candyEvents property on the current element
+        if (!el.candyEvents) {
+          el.candyEvents = [];
+        }
+
+        if (!el.candyEvents.event) el.candyEvents.event = [];
+        el.candyEvents.push({
+          event: {
+            type: eventName,
+            callback: callback,
+            proxyCallback: handleEvent,
+            data: data
+          }
+        });
+        console.dir(el);
+        el.addEventListener(eventName, handleEvent);
+      });
+    }
+  });
+  return this;
+};
+
 Candy.prototype.parent = function (selector) {
   var parents = [];
   this.forEach(function (el) {
@@ -608,7 +712,6 @@ Candy.prototype.toArray = function () {
 };
 
 Candy.prototype.toggleClass = function (classes) {
-  console.log('toggle');
   var classNames = classes.split(' ');
   this.forEach(function (el) {
     classNames.forEach(function (c) {
@@ -655,9 +758,10 @@ Candy.prototype.width = function (value) {
     return undefined;
   }
 
-  var val = typeof value === 'number' ? "".concat(value, "px") : value;
-  console.log(val);
+  var val = typeof value === 'number' ? "".concat(value, "px") : value; //console.log(val);
+
   this.forEach(function (el) {
     $(el).css('width', val);
   });
+  return this;
 };
